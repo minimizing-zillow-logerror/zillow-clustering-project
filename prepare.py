@@ -164,7 +164,12 @@ def drop_outliers(zillow, k, method="iqr"):
 
 def wrangle_zillow():
     zillow = pd.read_csv("zillow_data.csv")
-    zillow = drop_null_col(zillow)
+    col_drop = ["propertyzoningdesc", "calculatedbathnbr", "fullbathcnt", "Unnamed: 0"]
+    zillow.drop(columns = col_drop, inplace=True)
+    
+
+    zillow = drop_null_col(zillow)   
+    
 
     col_obj = ["heatingorsystemtypeid", "parcelid", "id", "fips", "latitude", "longitude", "yearbuilt", "assessmentyear", "censustractandblock", "regionidcity", "regionidzip", "regionidcounty", "propertylandusetypeid"]
 
@@ -172,10 +177,11 @@ def wrangle_zillow():
 
     zillow = impude_values(zillow)
 
-    col_drop = ["propertyzoningdesc", "heatingorsystemtypeid", "calculatedbathnbr", "fullbathcnt", "Unnamed: 0"]
-
-    zillow.drop(columns = col_drop)
 
     zillow = drop_outliers(zillow, 3)
+
+    zillow = zillow.drop(columns="heatingorsystemtypeid")
+
+    zillow = zillow.dropna()
 
     return zillow
