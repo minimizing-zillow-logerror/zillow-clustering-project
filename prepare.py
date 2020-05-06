@@ -1,6 +1,9 @@
 from env import host, user, password
 import pandas as pd
 import numpy as np
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler, QuantileTransformer, PowerTransformer, RobustScaler, MinMaxScaler
+
 
 # ~~~~~~~~~ Acquire ~~~~~~~~~~ #
 
@@ -184,4 +187,20 @@ def wrangle_zillow():
 
     zillow = zillow.dropna()
 
+    zillow = wrangle_geo_data(zillow)
+
     return zillow
+
+
+# ~ scaling
+
+# Helper function used to updated the scaled arrays and transform them into usable dataframes
+def return_values_explore(scaler, df):
+    df_scaled = pd.DataFrame(scaler.transform(df), columns=df.columns.values).set_index([df.index.values])
+    return scaler, df_scaled
+
+# Linear scaler
+def min_max_scaler_explore(df):
+    scaler = MinMaxScaler().fit(df)
+    scaler, df = return_values_explore(scaler, df)
+    return scaler, df
