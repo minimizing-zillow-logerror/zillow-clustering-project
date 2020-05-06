@@ -1,4 +1,4 @@
-from env import sql_database
+from env import host, user, password
 import pandas as pd
 import numpy as np
 
@@ -29,6 +29,14 @@ WHERE latitude IS NOT NULL AND longitude IS NOT NULL
 '''
 
 data_base_name = "zillow"
+
+def sql_database(data_base_name, query):
+    global host
+    global user
+    global password
+    url = f'mysql+pymysql://{user}:{password}@{host}/{data_base_name}'
+    df = pd.read_sql(query, url)
+    return df
 
 def run_query_to_csv():
     df = sql_database(data_base_name, query)
