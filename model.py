@@ -41,6 +41,27 @@ def run_lm(X_train, y_train):
     y_pred = lm.predict(X_train)
     return lm, y_pred
 
+# print points
+
+def print_predicted_vs_actual(predictions, model, label):
+    plt.figure(figsize=(9, 9))
+
+    plt.scatter(predictions.actual, predictions[model], label="label", marker='o')
+    plt.scatter(predictions.actual, predictions.baseline, label=r'Baseline ($\hat{y} = \bar{y}$)', marker='o')
+    plt.plot(
+        [predictions.actual.min(), predictions.actual.max()],
+        [predictions.actual.min(), predictions.actual.max()],
+        ls=':',
+        label='perfect prediction',
+        c='grey'
+    )
+
+    plt.legend(title='Model')
+    plt.ylabel('Predicted')
+    plt.xlabel('Actual')
+    plt.title('Predicted vs Actual')
+
+    plt.show()
 
 # Random Forest Regression
 
@@ -49,3 +70,7 @@ def run_rf(X_train, y_train, n_estimators, max_depth):
     rf.fit(X_train, y_train)
     y_pred = rf.predict(X_train)
     return rf, y_pred
+
+def get_feature_importance(model):
+    features = model.feature_importances_
+    return features
