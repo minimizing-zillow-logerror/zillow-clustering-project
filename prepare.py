@@ -171,7 +171,7 @@ def drop_outliers(zillow, k, method="iqr"):
 
     return zillow
 
-# __ MAIN PREP FUNCTION__
+# __ MAIN PREP FUNCTION__ # 
 
 def wrangle_zillow():
     zillow = pd.read_csv("zillow_data.csv")
@@ -204,6 +204,9 @@ def wrangle_zillow():
 #   Scaling    #
 # ------------ #   
 
+
+# ~~~~~ Before Splitting ~~~~~ #
+
 # Helper function used to updated the scaled arrays and transform them into usable dataframes
 def return_values_explore(scaler, df):
     df_scaled = pd.DataFrame(scaler.transform(df), columns=df.columns.values).set_index([df.index.values])
@@ -214,3 +217,36 @@ def min_max_scaler_explore(df):
     scaler = MinMaxScaler().fit(df)
     scaler, df = return_values_explore(scaler, df)
     return scaler, df
+
+# ~~~~~ After Splitting ~~~~~ #
+
+# Helper function used to updated the scaled arrays and transform them into usable dataframes
+def return_values(scaler, train, validate, test):
+    '''
+    Helper function used to updated the scaled arrays and transform them into usable dataframes
+    '''
+    train_scaled = pd.DataFrame(scaler.transform(train), columns=train.columns.values).set_index([train.index.values])
+    validate_scaled = pd.DataFrame(scaler.transform(validate), columns=validate.columns.values).set_index([validate.index.values])
+    test_scaled = pd.DataFrame(scaler.transform(test), columns=test.columns.values).set_index([test.index.values])
+    return scaler, train_scaled, validate_scaled, test_scaled
+
+# Linear scaler
+def min_max_scaler(train,validate, test):
+    '''
+    Helper function that scales that data. Returns scaler, as well as the scaled dataframes
+    '''
+    scaler = MinMaxScaler().fit(test)
+    scaler, train_scaled, validate_scaled, test_scaled = return_values(scaler, train, validate, test)
+    return scaler, train_scaled, validate_scaled, test_scaled
+
+#---------------------#
+#       Splitting     #
+#---------------------#
+
+def split_data(df):
+    '''
+    Main function to split data into train, validate, and test datasets. Random_state == 123, train_size = .8
+    '''
+    train, test = train_test_split(df, random_state =123, train_size=.8)
+    train, validate = train_test_split(train, random_state=123, train_size=.75)
+    return train, validate, test
