@@ -61,12 +61,6 @@ def wrangle_geo_data(df):
 # ~~~~~~~~~ Prep ~~~~~~~~~ #
 
 
-# ------------------------- #
-#    Find Missing Values    # 
-# ------------------------- #
-
-
-
 def change_dtypes(df, col, type):
     df = df[col].astype(type)
     return df
@@ -74,6 +68,11 @@ def change_dtypes(df, col, type):
 def drop_null_col(df, ptc=.5):
     df = df.dropna(axis =1, thresh=(df.shape[0] * ptc))
     return df
+
+# ------------------------- #
+#    Find Missing Values    # 
+# ------------------------- #
+
 
 def impude_unit_cnt(df):
     if df.propertylandusedesc == "Condominium" or df.propertylandusedesc == "Single Family Residential":
@@ -113,7 +112,10 @@ def impude_values(zillow):
 
     return zillow
 
-# Outliers
+# ------------------- #
+# Dectecting Outliers #
+# ------------------- #
+
 
 def get_upper_outliers_iqr(s, k):
     '''
@@ -152,18 +154,24 @@ def detect_outliers(s, k, method="iqr"):
     
 def detect_columns_outliers(df, k, method="iqr"):
     outlier = pd.DataFrame()
-    for col in df.select_dtypes(exclude="object"):
+    for col in df.select_dtypes("number"):
         is_outlier = detect_outliers(df[col], k, method=method)
         outlier[col] = is_outlier
     return outlier
 
 def drop_outliers(zillow, k, method="iqr"):
-    outliers = detect_columns_outliers(zillow, k, method=method)
-    zillow = zillow.drop(outliers.lotsizesquarefeet[outliers.lotsizesquarefeet > 10].dropna().index)
-    
+    # outliers = detect_columns_outliers(zillow, k, method=method)
+    # zillow = zillow.drop(outliers.lotsizesquarefeet[outliers.lotsizesquarefeet > 10].dropna().index)
+    # outliers = detect_columns_outliers(zillow, k, method=method)
+    # zillow = zillow.drop(outliers.taxamount[outliers.taxamount > 10].dropna().index)
+
+    zillow = zillow[zillow.lotsizesquarefeet < zillow.lotsizesquarefeet.quantile(.90)]
+    zillow = zillow[zillow.taxamount < zillow.taxamount.quantile(.90)]
+    zillow = zillow[zillow.taxvaluedollarcnt < zillow.taxvaluedollarcnt.quantile(.90)]
+
     return zillow
 
-# Wrangle
+# __ MAIN PREP FUNCTION__
 
 def wrangle_zillow():
     zillow = pd.read_csv("zillow_data.csv")
@@ -192,7 +200,9 @@ def wrangle_zillow():
     return zillow
 
 
-# ~ scaling
+# ------------ #
+#   Scaling    #
+# ------------ #   
 
 # Helper function used to updated the scaled arrays and transform them into usable dataframes
 def return_values_explore(scaler, df):
