@@ -311,9 +311,39 @@ def prepare_for_modeling(zillow, features=[]):
     y_test = test.logerror
 
     # scaling
-    
+
     scaler, train_scaled, validate_scaled, test_scaled = min_max_scaler(X_train, X_validate, X_test)
 
     return train_scaled, y_train, validate_scaled, y_validate, test_scaled, y_test
 
 
+
+def prepare_for_modeling_county(zillow, county, features=[]):
+    # Acquire and Prep
+    zillow = wrangle_zillow()
+
+    #apply county filter
+    zillow = zillow[zillow.county == county]
+    
+    # Feature Engineering
+    zillow = engineer_features(zillow)
+
+    # Clusterineering
+    zillow = create_cluster_centers_tax_location(zillow)
+    zillow = create_cluster_center_size(zillow)
+    
+    # Split
+    train, validate, test = split_data(zillow)
+
+    X_train = train[features]
+    y_train = train.logerror
+    X_validate = validate[features]
+    y_validate = validate.logerror
+    X_test = test[features]
+    y_test = test.logerror
+
+    # scaling
+
+    scaler, train_scaled, validate_scaled, test_scaled = min_max_scaler(X_train, X_validate, X_test)
+
+    return train_scaled, y_train, validate_scaled, y_validate, test_scaled, y_test
