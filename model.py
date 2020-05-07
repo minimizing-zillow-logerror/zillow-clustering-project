@@ -2,6 +2,8 @@ from sklearn.cluster import KMeans
 import matplotlib.pyplot as plt
 import seaborn as sns
 import pandas as pd
+from sklearn.ensemble import RandomForestRegressor
+from sklearn.linear_model import LinearRegression
 
 # ------------------ #
 #    Clustering      #
@@ -27,3 +29,23 @@ def create_cluster(df, n_cluster, col, cluster_name):
     df[cluster_name] = kmeans.predict(X)
     df[cluster_name] = 'cluster_' + (df[cluster_name] + 1).astype('str')
     return df, centroid
+
+# ------------------ #
+#    Regression      #
+# ------------------ #
+
+# Linear Regression Model
+def run_lm(X_train, y_train):
+    lm = LinearRegression()
+    lm.fit(X_train, y_train)
+    y_pred = lm.predict(X_train)
+    return lm, y_pred
+
+
+# Random Forest Regression
+
+def run_rf(X_train, y_train, n_estimators, max_depth):
+    rf = RandomForestRegressor(n_estimators = n_estimators, random_state = 123, max_depth = max_depth)
+    rf.fit(X_train, y_train)
+    y_pred = rf.predict(X_train)
+    return rf, y_pred
