@@ -92,3 +92,9 @@ def get_feature_importance(model):
     '''
     features = model.feature_importances_
     return features
+
+def visualize_feature_importance(features, model):
+    feature_importance = pd.DataFrame({"features": features, "feature_importance": model.feature_importances_})
+    sns.barplot(data=feature_importance, x="features", y="feature_importance")
+    plt.xticks(rotation = 45, ha="right")
+    plt.title("What features have the most influence?")
