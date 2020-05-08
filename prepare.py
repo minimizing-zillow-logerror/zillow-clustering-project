@@ -4,6 +4,7 @@ import numpy as np
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler, QuantileTransformer, PowerTransformer, RobustScaler, MinMaxScaler
 import model
+import prepare
 
 
 # ~~~~~~~~~ Acquire ~~~~~~~~~~ #
@@ -265,6 +266,17 @@ def min_max_scaler_explore(df):
     scaler = MinMaxScaler().fit(df)
     scaler, df = return_values_explore(scaler, df)
     return scaler, df
+
+def scale_data_for_exploration(zillow):
+    
+    df_scaling = zillow.select_dtypes(exclude="object")
+
+    scaler, df_scaled = prepare.min_max_scaler_explore(df_scaling)
+
+    df_object = zillow.select_dtypes("object")
+
+    zillow = pd.concat([df_object, df_scaled], axis=1)
+
 
 # ~~~~~ After Splitting ~~~~~ #
 
