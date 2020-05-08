@@ -12,6 +12,9 @@ from sklearn.linear_model import LinearRegression
 
 # Elbow code
 def create_elbow_graph(df, col):
+    '''
+    Function to draw and elbow graph. Takes a dataframe and the name of a column to create a cluster
+    '''
     X = df[col]
     with plt.style.context('seaborn-whitegrid'):
         plt.figure(figsize=(9, 6))
@@ -23,6 +26,9 @@ def create_elbow_graph(df, col):
 
 # Cluster
 def create_cluster(df, n_cluster, col, cluster_name):
+    '''
+    Function to cluster features. Takes a dataframe, the number of clusters and the columns to cluster by
+    '''
     X = df[col]
     kmeans = KMeans(n_clusters=n_cluster).fit(X)
     centroid = kmeans.cluster_centers_
@@ -36,6 +42,9 @@ def create_cluster(df, n_cluster, col, cluster_name):
 
 # Linear Regression Model
 def run_lm(X_train, y_train):
+    '''
+    Function to run linear regression models. Return the model and the predction for x
+    '''
     lm = LinearRegression()
     lm.fit(X_train, y_train)
     y_pred = lm.predict(X_train)
@@ -44,6 +53,9 @@ def run_lm(X_train, y_train):
 # print points
 
 def print_predicted_vs_actual(predictions, model, label):
+    '''
+    Function used to draw plot of actual vs predicted values
+    '''
     plt.figure(figsize=(9, 9))
 
     plt.scatter(predictions.actual, predictions[model], label="label", marker='o')
@@ -66,11 +78,17 @@ def print_predicted_vs_actual(predictions, model, label):
 # Random Forest Regression
 
 def run_rf(X_train, y_train, n_estimators, max_depth):
+    '''
+    Function to run random forest regressor model
+    '''
     rf = RandomForestRegressor(n_estimators = n_estimators, random_state = 123, max_depth = max_depth)
     rf.fit(X_train, y_train)
     y_pred = rf.predict(X_train)
     return rf, y_pred
 
 def get_feature_importance(model):
+    '''
+    Function to return coeficients, as well their importance. Only works for random forest model.
+    '''
     features = model.feature_importances_
     return features
