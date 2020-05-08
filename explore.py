@@ -21,7 +21,7 @@ def data_distribution(df):
     plt.show()
 
 # ------------------ #
-#    Exploration     #
+#        Viz         #
 # ------------------ #
 
 def log_error_cluster_groupings(df):
