@@ -3,18 +3,24 @@
 ## Goal:
 * Improve our original estimate of the log error by using clustering methodologies
 
-# Data:
+## Data:
 * From the Zillow data:
     * 2017 properties and prediction data from zillow database for  single unit/single family homes.
 
-# Deliverables:
+## Deliverables:
 > Notebook: A final notebook (what you will deliver in your presenation) that is cleaned. It has markdown talking through thought processes, steps taken, decisions made. It has code commented. It runs the functions instead of the code behind it, in the tasks where functions are stored in a separate module. It includes the project planning steps. Be sure you prepare!! It has an intro, agenda, start with a summary of what you found (as you would in slides) and a conclusion. It has visualizations that incorporate best practices and that show your greatest discoveries in your exploration.
 
 > ReadMe: You will need a ReadMe to indicate how to reproduce your work. You can include your project planning steps here as well, if you would like. Or a version of it.
 
 > Modules: Where functions are necessary, indicated or ideal, it runs the functions in the notebook, but the functions are stored in their respective modules (prepare.py, e.g.). You will have an acquire.py, prepare.py (or wrangle to cover both acquire and prepare), and model.py (fit, predict, evaluate the final model). For bonus, you could add a preprocessing.py (where you will split, scale...or split_scale.py) and explore/clustering module, but it is not necessary.
 
-# Executive Summary 
+## Executive Summary 
+
+We gain a lot of useful insight and knowledge in the exploration phase, and clustering allowed us to visualize the data in new and exiting ways. Unfortunately, it is very hard to predict the logerror, as it is fairly close to zero, and in general, the baseline performs about the same as the models. 
+
+We recommend using the baseline, as Zillow has a strong model, with low logerror variance. 
+
+## Findings Overview
 
 After extensive exploration, these were out findings:
 
@@ -47,22 +53,7 @@ We use kmeans clustering to create new clusters that could helps us better under
 
 * Created new clusters using `longitude`, `latitude` and `tax_rate`, as we found that there was a difference in tax_rate, and by using the mean tax_rate of the centroids, we could predict the level of variance in the `logerror`
 
-# Create a new "age_home"
-
-zillow["age_home"] = 2017 - zillow.yearbuilt
-
-# total_property_size (combine calculated square feet of the house plus the size of the lot)
-
-zillow["total_size"] = zillow.finishedsquarefeet12 + zillow.lotsizesquarefeet
-
-# value_ratio = qhat is the rate between home tax and property tax
-zillow["value_ratio"] = zillow.landtaxvaluedollarcnt / zillow.taxamount
-
-# What the tax rate is 
-
-zillow["tax_rate"] = zillow.taxamount / zillow.taxvaluedollarcnt
-
-# Modeling
+## Modeling
 Three different models were implemented:
 
 ### Linear Regression
@@ -70,15 +61,13 @@ Three different models were implemented:
 
 * The same model was used, but split by county, so that each county had it's own model. The results were pulled together, and the overall model actually performed about the same as the base line.
 
+### Random Forest 
+
 * A random forest regressor was also tried, using the same features. Overall, the model performed muched better than the baseline, but had a negative r-square value, meaning that the model was actually performing worse than the baseline. 
 
-## Summary
 
-We gain a lot of useful insight and knowledge in the exploration phase, and clustering allowed us to visualize the data in new and exiting ways. Unfortunately, it is very hard to predict the logerror, as it is fairly close to zero, and in general, the baseline performs about the same as the models. 
 
-We recommend using the baseline, as Zillow has a strong model, with low logerror variance. 
-
-Data Dictionary:
+### Data Dictionary:
 
 key|old_key|description|
 ---|-------|-----------|
