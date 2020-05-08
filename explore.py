@@ -154,7 +154,7 @@ def tax_location_cluster_relationships(df):
 def compare_mse_scores(df):
     sns.barplot(x=df.index, y=df.values)
     plt.xticks(rotation=45, ha="right")
-    plt.title("It's hard to beat the baseline")
+    plt.title("How does our model compare to the baseline?")
     plt.ylabel("MSE Score")
     plt.show
 
