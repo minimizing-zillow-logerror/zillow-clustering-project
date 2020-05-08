@@ -35,6 +35,9 @@ WHERE latitude IS NOT NULL AND longitude IS NOT NULL
 data_base_name = "zillow"
 
 def sql_database(data_base_name, query):
+    '''
+    Query to read data from SQL server
+    '''
     global host
     global user
     global password
@@ -43,15 +46,24 @@ def sql_database(data_base_name, query):
     return df
 
 def run_query_to_csv():
+    '''
+    Helper function to store a dataframe as a csv.
+    '''
     df = sql_database(data_base_name, query)
     df.to_csv("zillow_data.csv")
 
 def read_zillow():
+    '''
+    Helper function to read zillow csv. It also drops the "Unnamed" column
+    '''
     df = pd.read_csv("zillow_data.csv")
     df.drop(columns= "Unnamed: 0", inplace=True)
     return df
 
 def wrangle_geo_data(df):
+    '''
+     Helper function used to add county and state data to the df
+    '''
     data = [["CA", "Los Angeles", 6037], ["CA", "Orange County", 6059], ["CA", "Ventura County", 6111]]
     fips = pd.DataFrame(data, columns= ["state", "county", "fips"])
     df.fips = df.fips.astype(int)
@@ -63,10 +75,16 @@ def wrangle_geo_data(df):
 
 
 def change_dtypes(df, col, type):
+    ''' 
+    Helper function used to changed data types
+    '''
     df = df[col].astype(type)
     return df
 
 def drop_null_col(df, ptc=.5):
+    ''' 
+    Helper function used drop columns with a number of high threshold nulls. Parameter is set to .5
+    '''
     df = df.dropna(axis =1, thresh=(df.shape[0] * ptc))
     return df
 
@@ -76,6 +94,9 @@ def drop_null_col(df, ptc=.5):
 
 
 def impude_unit_cnt(df):
+    '''
+    Helper function used to impude unit count by using the propertylandusedesc
+    '''
     if df.propertylandusedesc == "Condominium" or df.propertylandusedesc == "Single Family Residential":
         return 1
     else:
@@ -83,7 +104,9 @@ def impude_unit_cnt(df):
 
 
 def impude_values(zillow):
-    
+    '''
+    Helepr function used to impude some missing values. Most values are impuded either with the mean or the mode
+    '''
     zillow.lotsizesquarefeet = zillow.lotsizesquarefeet.fillna(zillow.lotsizesquarefeet.median())
 
     # heatingorsystemdesc Filled na with "none"
@@ -132,6 +155,9 @@ def get_upper_outliers_iqr(s, k):
     return s.apply(lambda x: max([x - upper_bound, 0]))
 
 def outliers_z_score(ys):
+    '''
+    Function used to detect outliers using z_score
+    '''
     threshold = 3
 
     mean_y = np.mean(ys)
@@ -140,9 +166,15 @@ def outliers_z_score(ys):
     return np.where(np.abs(z_scores) > threshold)
 
 def outliers_percentile(s):
+    '''
+    Function used to detect outliers using percentiles
+    '''
     return s > s.quantile(.99)
 
 def detect_outliers(s, k, method="iqr"):
+    ''' 
+    Main function to detect outliers. Takes a series, a value for k, and a method for detecting outliers. Standard method for detecting outliers is IQR
+    '''
     if method == "iqr":
         upper_bound = get_upper_outliers_iqr(s, k)
         return upper_bound
@@ -154,6 +186,9 @@ def detect_outliers(s, k, method="iqr"):
         return percentile
     
 def detect_columns_outliers(df, k, method="iqr"):
+    '''
+    Function used to detect outliers across the entire dataframe
+    '''
     outlier = pd.DataFrame()
     for col in df.select_dtypes("number"):
         is_outlier = detect_outliers(df[col], k, method=method)
@@ -161,6 +196,9 @@ def detect_columns_outliers(df, k, method="iqr"):
     return outlier
 
 def drop_outliers(zillow, k, method="iqr"):
+    '''
+    Function used to drop outliers
+    '''
     # outliers = detect_columns_outliers(zillow, k, method=method)
     # zillow = zillow.drop(outliers.lotsizesquarefeet[outliers.lotsizesquarefeet > 10].dropna().index)
     # outliers = detect_columns_outliers(zillow, k, method=method)
@@ -175,6 +213,9 @@ def drop_outliers(zillow, k, method="iqr"):
 # __ MAIN PREP FUNCTION__ # 
 
 def wrangle_zillow():
+    '''
+    Main function for prep. It reads the data, impudes relevant missing values and drops colums and rows with too many null values. Also adds geo data (county and state)
+    '''
     zillow = pd.read_csv("zillow_data.csv")
     col_drop = ["propertyzoningdesc", "calculatedbathnbr", "fullbathcnt", "Unnamed: 0"]
     zillow.drop(columns = col_drop, inplace=True)
@@ -210,11 +251,17 @@ def wrangle_zillow():
 
 # Helper function used to updated the scaled arrays and transform them into usable dataframes
 def return_values_explore(scaler, df):
+    ''' 
+    Function used to scale data. Because of the nature of the project. We needed to scale a dataframe.
+    '''
     df_scaled = pd.DataFrame(scaler.transform(df), columns=df.columns.values).set_index([df.index.values])
     return scaler, df_scaled
 
 # Linear scaler
 def min_max_scaler_explore(df):
+    '''
+    Function used to scale data. Because of the nature of the project. We needed to scale a dataframe.
+    '''
     scaler = MinMaxScaler().fit(df)
     scaler, df = return_values_explore(scaler, df)
     return scaler, df
@@ -257,7 +304,9 @@ def split_data(df):
 #---------------------#
 
 def engineer_features(zillow):
-        
+    '''
+    Helper function used to create engieneered features
+    '''
     # Create a new "age_home"
     zillow["age_home"] = 2017 - zillow.yearbuilt
     # total_property_size (combine calculated square feet of the house plus the size of the lot)
@@ -269,6 +318,9 @@ def engineer_features(zillow):
     return zillow
 
 def create_cluster_centers_tax_location(zillow):
+    '''
+    Helper function used to create clusters and add the centroids to the dataframe for modeling
+    '''
     zillow, centroid = model.create_cluster(zillow, 8, ["tax_rate", "latitude", "longitude" ], "tax_location_cluster")
     
     centroid_2 = pd.DataFrame({"tax_location_cluster": zillow.tax_location_cluster.unique(), "tax_rate": centroid[:,0], "latitude": centroid[:,1], "longitude": centroid[:,2]})
@@ -278,6 +330,9 @@ def create_cluster_centers_tax_location(zillow):
     return zillow
 
 def create_cluster_center_size(zillow):
+    '''
+    Helper function used to create clusters and add the centroids to the dataframe for modeling
+    '''
     
     zillow, centroid = model.create_cluster(zillow, 4, ["total_size"], "total_size_cluster")
 
@@ -290,6 +345,9 @@ def create_cluster_center_size(zillow):
 
 
 def prepare_for_modeling(zillow, features=[]):
+    '''
+    Main preprocessing function to use for modeling 
+    '''
     # Acquire and Prep
     zillow = wrangle_zillow()
     
@@ -319,6 +377,9 @@ def prepare_for_modeling(zillow, features=[]):
 
 
 def prepare_for_modeling_county(zillow, county, features=[]):
+    '''
+    Special function used to prepare data for modeling by county 
+    '''
     # Acquire and Prep
     zillow = wrangle_zillow()
 
